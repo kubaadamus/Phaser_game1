@@ -165,81 +165,41 @@ GameManager.Level_1.prototype = {
         game.load.audio('button_click', 'assets/mario/audio/button_click.mp3');
 
         //player sprite
-        game.load.image('mario', 'assets/mario/images/mario.png');
+        game.load.image('player', 'assets/mario/images/mario.png');
 
         //Elementy otoczenia
         game.load.image('block1', 'assets/mario/images/block1.jpg');
     },
     create: function () {
-        // Tło
-        background = game.add.tileSprite(0, 0, 800, 600, 'background');
-        background.scale.setTo(2, 2);
-        //HUD
-        quitToMainButton = new LabelButton(this.game, 400, 100, "button", "QUIT", 'quitToMain', this.actionOnClick, this, 1, 0, 2);
-        if (mute == 0) {
-            music.stop();
-            music.play();
-        }
-        //Rejestrujemy przyciski inputu
-        //  Register the keys.
-        this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-        this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-        this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        //Dodaj do klawiszy przechowywanie poprzedniego stanu
-        this.leftKey.previousState = false; // false = not pressed
-        //  Stop the following keys from propagating up to the browser
-        game.input.keyboard.addKeyCapture([Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR]);
-
-        //Dodajemy do gry sprajta gracza
-        this.mario = game.add.sprite(100, 96, 'mario');
-
-        //Dodajemy sprajta bloku
-        this.tilesprite = game.add.tileSprite(100, 200, 170, 170, 'block1');
 
         //Włączamy system fizyki
         game.physics.startSystem(Phaser.Physics.ARCADE);
 
-        //  Set the world (global) gravity
-        game.physics.arcade.gravity.y = 500;
+        platforms = game.add.group();
+        platforms.enableBody = true;
 
-        //Włączanie fizyki dla obiektu
-        //game.physics.arcade.enable([this.mario, this.tilesprite]);
+        let ground = platforms.create(100,100,'block1');
+        ground.body.immovable = true;
 
-        //Włączamy kolizję z krawędzią świata
-        this.mario.body.collideWorldBounds = true;
-        this.mario.body.bounce.y = 0.3;
+        let ledge = platforms.create(100,400,'block1');
+        ledge.body.immovable = true;
+
+        player = game.add.sprite(100,40,'player');
+        game.physics.arcade.enable(player);
+        player.body.bounce=0.2;
+        player.body.gravity.y=800;
+        player.body.collideWorldBounds = true;
 
 
 
-        //Każemy kamerze podążać za graczem
-        game.camera.follow(this.mario);
 
-
-        game.world.setBounds(0, 0, 1920, 1200);
+        game.world.setBounds(0, 0, 800, 600);
 
     },
     update: function () {
 
+        game.physics.arcade.collide(player,platforms);
 
-        //Obsługa przycisków
-        if (this.leftKey.isDown) {
-            this.mario.body.velocity.x = -150;
-        }
-        else if (this.rightKey.isDown) {
-            this.mario.body.velocity.x = 150;
-        }
-        else if (!this.leftKey.isDown && !this.rightKey.isDown) {
-            this.mario.body.velocity.x = 0;
-        }
-
-
-
-        if (this.spaceKey.isDown && this.mario.body.onFloor()) {
-            this.mario.body.velocity.y = -250;
-        } 
-
-        //Obsługa kolizji
-        //game.physics.arcade.collide(this.mario, this.tilesprite);
 
     },
 
