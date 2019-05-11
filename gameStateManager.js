@@ -1,64 +1,12 @@
 var GameManager = {};
 
-
-
 GameManager.Main = function (game) {
 };
 GameManager.Level_1 = function (game) {
 };
 GameManager.Main.prototype = {
 
-    up: function () {
-        console.log('button up', arguments);
-    },
-    over: function () {
-        console.log('button over');
-    },
-    out: function () {
-        console.log('button out');
-    },
 
-    actionOnClick: function (e) {
-        console.log(e.name);
-        fx.play('button_click');
-        if (e.name == "play") {
-            this.state.start("Level_1");
-            music.pause();
-
-        }
-
-        if (e.name == "options") {
-            main_menu_button_group.visible = false;
-            options_menu_button_group.visible = true;
-            how_menu_group.visible = false;
-            backButton.visible = true;
-        }
-        if (e.name == "back") {
-            main_menu_button_group.visible = true;
-            options_menu_button_group.visible = false;
-            how_menu_group.visible = false;
-            backButton.visible = false;
-        }
-        if (e.name == "how") {
-            main_menu_button_group.visible = false;
-            options_menu_button_group.visible = false;
-            how_menu_group.visible = true;
-            backButton.visible = true;
-        }
-        if (e.name == "mute") {
-            if (mute == 0) {
-                mute = 1;
-                music.pause();
-                e.label.setText("Unmute");
-            }
-            else {
-                mute = 0;
-                music.resume();
-                e.label.setText("Mute");
-            }
-
-        }
-    },
 
     preload: function () {
 
@@ -77,7 +25,7 @@ GameManager.Main.prototype = {
         if (mute == 0) {
             music.play();
         }
-        // Przyciski będą w grupie
+        // Przyciski będą w grupie, żeby wlączać lub wyłączać widoczność dla wszystkich na raz
         main_menu_button_group = game.add.group();
         options_menu_button_group = game.add.group();
         how_menu_group = game.add.group();
@@ -106,39 +54,29 @@ GameManager.Main.prototype = {
         var howText_object = game.add.text(game.world.centerX - 300, 200, howText, howText_style);
         how_menu_group.add(howText_object);
 
-
-        // BackButton będzie w osobnej grupie
+        // BackButton będzie w osobnej grupie bo jest uniwersalny dla kilku podmenu
         backButton = new LabelButton(this.game, 400, 300, "button", "Back", 'back', this.actionOnClick, this, 1, 0, 2);
 
+
+        //To opcjonalne eventy dla przycisku, odpalają odpowiednie callbacki i podają wciśnięty przycisk (this)
         //playButton.onInputOver.add(over, this);
         //playButton.onInputOut.add(out, this);
         //playButton.onInputUp.add(up, this);
 
-
-
-        //Widoczność grup
+        //Widoczność grup. Na początku gry niektóre ukrywam a inne pokazuję
         main_menu_button_group.visible = true;
         options_menu_button_group.visible = false;
         how_menu_group.visible = false;
         backButton.visible = false;
 
 
-        //AUDIO
+        //AUDIO przycisków
         fx = game.add.audio('button_click');
         fx.allowMultiple = true;
         fx.addMarker('button_click', 0, 1.0);
-
-
-
-
     },
-
     update: function () {
-
     },
-}
-GameManager.Level_1.prototype = {
-
     up: function () {
         console.log('button up', arguments);
     },
@@ -148,62 +86,62 @@ GameManager.Level_1.prototype = {
     out: function () {
         console.log('button out');
     },
-
     actionOnClick: function (e) {
+        //Po kliknięciu na jakiś button odpal dźwięk klikniecia
         fx.play('button_click');
-        if (e.name == "quitToMain") {
-            this.state.start("Main");
-            music.stop();
+        //Handluj z przyciskami
+        if (e.name == "play") {
+            this.state.start("Level_1");
+            music.pause();
+        }
+        if (e.name == "options") {
+            main_menu_button_group.visible = false;
+            options_menu_button_group.visible = true;
+            how_menu_group.visible = false;
+            backButton.visible = true;
+        }
+        if (e.name == "back") {
+            main_menu_button_group.visible = true;
+            options_menu_button_group.visible = false;
+            how_menu_group.visible = false;
+            backButton.visible = false;
+        }
+        if (e.name == "how") {
+            main_menu_button_group.visible = false;
+            options_menu_button_group.visible = false;
+            how_menu_group.visible = true;
+            backButton.visible = true;
+        }
+        if (e.name == "quit") {
+            history.go(-1);
+        }
+        if (e.name == "mute") {
+            if (mute == 0) {
+                mute = 1;
+                music.pause();
+                e.label.setText("Unmute");
+            }
+            else {
+                mute = 0;
+                music.resume();
+                e.label.setText("Mute");
+            }
 
         }
     },
+}
+GameManager.Level_1.prototype = {
+
     preload: function () {
 
-
-        game.load.image('background', 'assets/mario/images/sky.jpg');
-        game.load.spritesheet('button', 'assets/mario/images/default_button_sprite_sheet.png', 193, 71);
-        game.load.audio('button_click', 'assets/mario/audio/button_click.mp3');
-
-        //player sprite
-        game.load.image('player', 'assets/mario/images/mario.png');
-
-        //Elementy otoczenia
-        game.load.image('block1', 'assets/mario/images/block1.jpg');
     },
+
     create: function () {
 
-        //Włączamy system fizyki
-        game.physics.startSystem(Phaser.Physics.ARCADE);
-
-        platforms = game.add.group();
-        platforms.enableBody = true;
-
-        let ground = platforms.create(100,100,'block1');
-        ground.body.immovable = true;
-
-        let ledge = platforms.create(100,400,'block1');
-        ledge.body.immovable = true;
-
-        player = game.add.sprite(100,40,'player');
-        game.physics.arcade.enable(player);
-        player.body.bounce=0.2;
-        player.body.gravity.y=800;
-        player.body.collideWorldBounds = true;
-
-
-
-
-        game.world.setBounds(0, 0, 800, 600);
-
     },
+
     update: function () {
 
-        game.physics.arcade.collide(player,platforms);
-
-
-    },
-
-
-
+    }
 
 };
