@@ -1,8 +1,6 @@
-
-
 //Game options
 var mute = 0;
-
+var mute_fx = 0;
 
 var LabelButton = function (game, x, y, key, label, name, callback, callbackContext, overFrame, outFrame, downFrame,
 
@@ -22,6 +20,17 @@ LabelButton.prototype.constructor = LabelButton; LabelButton.prototype.setLabel 
     this.label.setText(label);
 };
 
+function trol() {
+    console.log("TROL");
+}
 
-
+function up() {
+    console.log('button up', arguments);
+}
+function over() {
+    console.log('button over');
+}
+function out() {
+    console.log('button out');
+}
 
