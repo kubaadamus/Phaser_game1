@@ -1,7 +1,7 @@
 //Game options
 var mute = 0;
 var mute_fx = 0;
-var lives=0;
+var lives = 0;
 
 var LabelButton = function (game, x, y, key, label, name, callback, callbackContext, overFrame, outFrame, downFrame,
 
@@ -36,7 +36,7 @@ function out() {
 }
 
 
-function restartLevel(state){
+function restartLevel(state) {
 
     setTimeout(function () {
         game.state.start(state);
@@ -44,9 +44,39 @@ function restartLevel(state){
 
 }
 
-function killEnemy(enemy){
-    enemy.direction=0;
-    enemy.isAlive=false;
-    enemy.body.velocity.y=100;
-    
+function killEnemy(enemy) {
+    enemy.direction = 0;
+    enemy.isAlive = false;
+    enemy.body.velocity.y = 100;
+
+}
+
+function killPlayer(player, other) {
+    //Jeśli to z czym zderzył się gracz (other) ma ustawione isEnemy na true to..
+    if (other.isEnemy && (player.body.touching.left || player.body.touching.right)) {
+        console.log(player.body.touching);
+        player.body.velocity.x = 0;
+        player.body.velocity.y = -600;
+        player.isAlive = false;
+        game.camera.unfollow();
+        fx.play('mario_death');
+        lives--;
+        if (lives > 0) {
+            restartLevel("Level_1");
+        }
+        else {
+            lives = 5;
+            restartLevel("Main");
+        }
+
+    }
+}
+
+function changeEnemyDirection(player, enemy) {
+    enemy.direction = - enemy.direction;
+}
+function collectDiamond(player, diamond) {
+    diamond.kill();
+    score += 10;
+    scoreText.text = 'Score' + score;
 }
