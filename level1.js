@@ -7,7 +7,6 @@ GameManager.Level_1.prototype = {
         game.load.spritesheet('woof', 'assets/mario/images/woof.png', 32, 32);
         game.load.audio('mario_death', 'assets/mario/audio/mario_death.mp3');
     },
-
     create: function () {
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.add.sprite(0, 0, 'sky');
@@ -37,7 +36,7 @@ GameManager.Level_1.prototype = {
         }
         { // Dodawanie wrogów
             enemies = game.add.group(); // Grupa dla wrogów ( bo będzie ich kilku )
-            for (var i = 0; i < 3; i++) {
+            for (var i = 0; i < 1; i++) {
                 enemy = game.add.sprite(120 + i * 100, 500, 'woof');
 
                 game.physics.arcade.enable(enemy);
@@ -46,6 +45,7 @@ GameManager.Level_1.prototype = {
                 enemy.body.collideWorldBounds = true;
                 enemy.direction = 1;
                 enemy.isEnemy = 1;
+                enemy.isAlive = true;
                 enemy.animations.add('left', [0, 1], 10, true);
                 enemy.animations.add('right', [2, 3], 10, true);
                 enemies.add(enemy);
@@ -76,8 +76,6 @@ GameManager.Level_1.prototype = {
         scoreText = game.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
         cursors = game.input.keyboard.createCursorKeys();
         score = 0;
-
-
         //Świat
         game.world.setBounds(0, 0, 1920, 1200);
         game.camera.follow(player);
@@ -88,16 +86,11 @@ GameManager.Level_1.prototype = {
             fx.allowMultiple = false;
             fx.addMarker('mario_death', 0, 5.0);
         }
-
         console.log(lives);
-
     },
-
     update: function () {
-
-
         game.physics.arcade.collide(diamonds, platforms);
-
+        game.physics.arcade.collide(enemy_obstacles, enemies, this.changeEnemyDirection, null, this);
         player.body.velocity.x = 0;
         if (player.isAlive) {
             game.physics.arcade.overlap(player, diamonds, this.collectDiamond, null, this);
@@ -118,15 +111,13 @@ GameManager.Level_1.prototype = {
             }
         }
 
-
-
         if (score == 120) {
             alert("U WIN m8");
             score = 0;
         }
 
         {// ENEMIES LOGIC
-            game.physics.arcade.collide(enemies, platforms);
+
             if (player.isAlive) {
                 game.physics.arcade.collide(enemies, player);
             }
@@ -139,29 +130,28 @@ GameManager.Level_1.prototype = {
                 else if (enemy.direction == 1) {
                     enemy.animations.play('left');
                 }
-
-
                 //Collider na głowie wroga
                 if (enemy.body.touching.up) {
-                    
+
                     player.body.velocity.y = -200;
-                    enemy.body.touching.up=false;
-                    enemy.kill();
+                    enemy.body.touching.up = false;
+
+                    killEnemy(enemy);
                 }
+
+                if (enemy.isAlive) {
+                    game.physics.arcade.collide(enemy, platforms);
+                }
+
             });
-            game.physics.arcade.collide(enemy_obstacles, enemies, this.changeEnemyDirection, null, this);
-
-
-
             //Wykrywanie kolizji między graczem a wrogiem
             if (player.isAlive == true) {
                 player.body.onCollide = new Phaser.Signal();
                 player.body.onCollide.add(this.killPlayer, this, this);
             }
-
-
         }
     },
+
     killPlayer: function (player, other) {
         if (other.isEnemy && (player.body.touching.left || player.body.touching.right)) {
             console.log(player.body.touching);
@@ -171,12 +161,11 @@ GameManager.Level_1.prototype = {
             game.camera.unfollow();
             fx.play('mario_death');
             lives--;
-            if(lives>0)
-            {
+            if (lives > 0) {
                 restartLevel("Level_1");
             }
-            else{
-                lives=5;
+            else {
+                lives = 5;
                 restartLevel("Main");
             }
 

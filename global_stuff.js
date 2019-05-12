@@ -43,3 +43,10 @@ function restartLevel(state){
     }, 3000);
 
 }
+
+function killEnemy(enemy){
+    enemy.direction=0;
+    enemy.isAlive=false;
+    enemy.body.velocity.y=100;
+    
+}
