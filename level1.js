@@ -15,7 +15,7 @@ GameManager.Level_1.prototype = {
         platforms = game.add.group();
         platforms.enableBody = true;
 
-        ground = platforms.create(0, game.world.height - 64, 'ground');
+        ground = platforms.create(0, 550, 'ground');
         ground.scale.setTo(2, 2);
         ground.body.immovable = true;
 
@@ -26,7 +26,7 @@ GameManager.Level_1.prototype = {
         ledge.body.immovable = true;
 
         { //DODAWANIE GRACZA
-            player = game.add.sprite(32, game.world.height - 150, 'woof');
+            player = game.add.sprite(32, 32, 'woof');
             game.physics.arcade.enable(player);
             player.body.bounce.y = 0.2;
             player.body.gravity.y = 800;
@@ -38,13 +38,14 @@ GameManager.Level_1.prototype = {
         { // Dodawanie wrogów
             enemies = game.add.group(); // Grupa dla wrogów ( bo będzie ich kilku )
             for (var i = 0; i < 3; i++) {
-                enemy = game.add.sprite(120 + i * 100, game.world.height - 150, 'woof');
+                enemy = game.add.sprite(120 + i * 100, 500, 'woof');
 
                 game.physics.arcade.enable(enemy);
                 enemy.body.bounce.y = 0.2;
                 enemy.body.gravity.y = 800;
                 enemy.body.collideWorldBounds = true;
                 enemy.direction = 1;
+                enemy.isEnemy = 1;
                 enemy.animations.add('left', [0, 1], 10, true);
                 enemy.animations.add('right', [2, 3], 10, true);
                 enemies.add(enemy);
@@ -88,14 +89,14 @@ GameManager.Level_1.prototype = {
             fx.addMarker('mario_death', 0, 5.0);
         }
 
+        console.log(lives);
+
     },
 
     update: function () {
 
 
         game.physics.arcade.collide(diamonds, platforms);
-
-
 
         player.body.velocity.x = 0;
         if (player.isAlive) {
@@ -142,6 +143,9 @@ GameManager.Level_1.prototype = {
 
                 //Collider na głowie wroga
                 if (enemy.body.touching.up) {
+                    
+                    player.body.velocity.y = -200;
+                    enemy.body.touching.up=false;
                     enemy.kill();
                 }
             });
@@ -152,20 +156,31 @@ GameManager.Level_1.prototype = {
             //Wykrywanie kolizji między graczem a wrogiem
             if (player.isAlive == true) {
                 player.body.onCollide = new Phaser.Signal();
-                player.body.onCollide.add(this.killPlayer, this);
+                player.body.onCollide.add(this.killPlayer, this, this);
             }
 
 
-            //enemy animations
-
         }
     },
-    killPlayer: function (player, enemy) {
-        player.body.velocity.y = -600;
-        player.isAlive = false;
-        game.camera.unfollow();
-        fx.play('mario_death');
+    killPlayer: function (player, other) {
+        if (other.isEnemy && (player.body.touching.left || player.body.touching.right)) {
+            console.log(player.body.touching);
+            player.body.velocity.x = 0;
+            player.body.velocity.y = -600;
+            player.isAlive = false;
+            game.camera.unfollow();
+            fx.play('mario_death');
+            lives--;
+            if(lives>0)
+            {
+                restartLevel("Level_1");
+            }
+            else{
+                lives=5;
+                restartLevel("Main");
+            }
 
+        }
     },
 
     changeEnemyDirection: function (player, enemy) {

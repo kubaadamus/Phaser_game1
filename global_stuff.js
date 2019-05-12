@@ -1,6 +1,7 @@
 //Game options
 var mute = 0;
 var mute_fx = 0;
+var lives=0;
 
 var LabelButton = function (game, x, y, key, label, name, callback, callbackContext, overFrame, outFrame, downFrame,
 
@@ -34,3 +35,11 @@ function out() {
     console.log('button out');
 }
 
+
+function restartLevel(state){
+
+    setTimeout(function () {
+        game.state.start(state);
+    }, 3000);
+
+}
